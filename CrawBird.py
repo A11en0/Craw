@@ -19,7 +19,7 @@ class myThread (threading.Thread):  # 继承父类threading.Thread
 #        self.num = num
 
     def run(self):  # 把要执行的代码写到run函数里面 线程在创建后会直接运行run函数
-        DowloadPic(self.url)
+        getPic(self.url)
 
 
 def getHTML(url):
@@ -33,6 +33,17 @@ def getHTML(url):
         return html
     except:
         return ""
+
+
+def getPage(url):
+    page_list = []
+    html = getHTML(url)
+    print(url)
+    soup = BeautifulSoup(html, "html.parser")
+    for href in soup.find_all(href=re.compile(r"^forum.php\?mod=viewthread")):
+        bs = href["href"]
+        page_list.append(basic_url+bs)
+    return page_list
 
 
 def getPic(url):
@@ -93,17 +104,6 @@ def DowloadPic(url):
         pass
 
 
-def getPage(url):
-    page_list = []
-    html = getHTML(url)
-    print(url)
-    soup = BeautifulSoup(html, "html.parser")
-    for href in soup.find_all(href=re.compile(r"^forum.php\?mod=viewthread")):
-        bs = href["href"]
-        page_list.append(basic_url+bs)
-    return page_list
-
-
 def main():
     n = 3
     url = input("请输入要爬取的url地址：")
@@ -114,7 +114,8 @@ def main():
         pages = getPage(url)
         for page in pages:
             print("正在爬取:", page)
-            getPic(page)
+            thread = myThread(page)
+            thread.start()
 
 
 main()
